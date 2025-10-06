@@ -11,7 +11,7 @@
     <div class="container">
         <header>
             <h1>halo <span id="username"></span></h1>
-            <button type="submit" id="logoutbtn">Log Out</button>
+            <a href="/logout/">Log Out</a>
         </header>
 
         <main>
@@ -26,10 +26,10 @@
 
     <script>
         const usernameSpan = document.getElementById('username');
-        const logoutButton = document.getElementById('logoutbtn')
         const addTodoForm = document.getElementById('addTodoForm');
         const noteInput = document.getElementById('noteInput');
         const todoList = document.getElementById('todoList')
+        todoList.textContent = `${todoList}`
 
             (async () => {
                 try {
@@ -43,10 +43,10 @@
                         usernameSpan.textContent = data.username;
                         fetchTodos();
                     } else {
-                        window.location.href = '/logon/'
+                        window.location.href = '/login/'
                     }
                 } catch (error) {
-                    window.location.href = '/logon/'
+                    window.location.href = '/login/'
                 }
             })();
 
@@ -73,7 +73,7 @@
             if (!note) return
 
             try {
-                const response = await fetch('api/todos', {
+                const response = await fetch('/api/todos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'apllication//json' },
                     body: JSON.stringify({ note })
@@ -88,13 +88,6 @@
             }
         })
 
-        // logoutBtn.addEventListener('submit', async () => {
-        //     try {
-        //         await fetch('/api/logput', {method: POST})
-        //     } catch (error) {
-                
-        //     }
-        // })
     </script>
 </body>
 

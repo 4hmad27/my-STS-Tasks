@@ -6,8 +6,8 @@ import { users,todos } from './db/schema.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { setCookie } from 'hono/cookie';
-import { getCookie } from '@hono/node-serve/serve-static';
-import { serveStatic } from 'hono/serve-static';
+import { getCookie } from 'hono/cookie';
+import { serveStatic } from '@hono/node-server/serve-static';
 
 const app = new Hono();
 
@@ -17,7 +17,7 @@ app.get('/', (c) => {
   return c.html('<h1>Tim Artlim</h1><h2>Ahmad Afan Shobari</h2>')
 })
 
-app.post('/register', async (c) => {
+app.post('/api/register', async (c) => {
   try {
     const { username, password } = await c.req.json();
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -47,26 +47,13 @@ app.post('/api/login', async (c) => {
   return c.json({ success: true, message: 'Login berhasil' });
 })
 
-const api = new Hono();
 
-app.use('*', async (c, next) => {
-  const token = getCookie(c, 'token');
-  if (!token) return c.json({ success: false, message: 'Unauthorized' }, 401);
-  try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
-    c.set('user', user);
-    await next();
-  } catch (error) {
-    return c.json({ success: false, message: 'Unauthorized' }, 401);
-  }
-})
-
-api.get('/api/me', (c) => {
+app.get('/api/me', (c) => {
   const user = c.get('user');
   return c.json({ success: true, data: user });
 });
 
-app.route('/api', api);
+// app.route('/api', api);
 
 app.post('/logout', (c) => {
   setCookie(c, 'token', '', { maxAge: -1 });
@@ -88,7 +75,7 @@ app.post('/api/todos', async (c) => {
     }
 });
 
-app.get('api/todos', async (c) => {
+app.get('/api/todos', async (c) => {
   const token = getCookie(c, 'token');
     if (!token) return c.json({ success: false, message: 'Unauthorized' }, 401);
     try {
@@ -103,6 +90,6 @@ app.get('api/todos', async (c) => {
 });
 
 
-const port = 3333;
-console.log(`🚀 Server is running on http://localhost:${port}`)
+const port = 3330;
 serve({ fetch: app.fetch, port })
+console.log(`🚀 Server is running on http://localhost:${port}`)
