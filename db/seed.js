@@ -21,8 +21,8 @@ async function seed() {
     .returning();
 
   await db.insert(todos).values([
-    { note: 'Belajar Drizzle ORM', userId: user1.id },
-    { note: 'Membuat API dengan Hono', userId: user1.id },
+    { note: 'Belajar Drizzle ORM', usersid: user1.id },
+    { note: 'Membuat API dengan Hono', usersid: user1.id },
   ]);
  
   console.log('✅ Seeding completed!');

@@ -6,9 +6,12 @@ import { users,todos } from './db/schema.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { setCookie } from 'hono/cookie';
-import { getCookie } from 'hono/cookie';
+import { getCookie } from '@hono/node-serve/serve-static';
+import { serveStatic } from 'hono/serve-static';
 
 const app = new Hono();
+
+app.use('/*', serveStatic({ root: './public'}))
 
 app.get('/', (c) => {
   return c.html('<h1>Tim Artlim</h1><h2>Ahmad Afan Shobari</h2>')
@@ -28,7 +31,7 @@ app.post('/register', async (c) => {
   }
 });
 
-app.post('/login', async (c) => {
+app.post('/api/login', async (c) => {
   const { username, password } = await c.req.json();
   const user = await db.query.users.findFirst({ where: (users, { eq }) => eq(users.username, username) });
 
@@ -58,7 +61,7 @@ app.use('*', async (c, next) => {
   }
 })
 
-api.get('/me', (c) => {
+api.get('/api/me', (c) => {
   const user = c.get('user');
   return c.json({ success: true, data: user });
 });
@@ -98,6 +101,7 @@ app.get('api/todos', async (c) => {
         return c.json({ success: false, message: 'Unauthorized' }, 401);
     }
 });
+
 
 const port = 3333;
 console.log(`🚀 Server is running on http://localhost:${port}`)
