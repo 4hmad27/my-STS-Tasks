@@ -2,8 +2,7 @@ import 'dotenv/config';
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { db } from './db/index.js';
-import { users } from './db/schema.js';
-import { todos } from './db/schema.js';
+import { users,todos } from './db/schema.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { setCookie } from 'hono/cookie';
@@ -71,21 +70,33 @@ app.post('/logout', (c) => {
   return c.json({ success: true, message: 'Logout berhasil' });
 });
 
-api.post('/todos', async (c) => {
-    const user = c.get('user');
-    const { note } = await c.req.json();
+app.post('/api/todos', async (c) => {
+  const token = getCookie(c, 'token');
+    if (!token) return c.json({ success: false, message: 'Unauthorized' }, 401);
+    try {
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+         const { note } = await c.req.json();
     const newTodo = await db.insert(todos)
-        .values({ note, userid: user.id })
+        .values({ note, usersid: user.id })
         .returning();
     return c.json({ success: true, data: newTodo[0] }, 201);
+    } catch (error) {
+        return c.json({ success: false, message: 'Unauthorized' }, 401);
+    }
 });
 
-api.get('/todos', async (c) => {
-    const user = c.get('user');
-    const userTodos = await db.query.todos.findMany({
-        where: (todos, { eq }) => eq(todos.userid, user.id)
+app.get('api/todos', async (c) => {
+  const token = getCookie(c, 'token');
+    if (!token) return c.json({ success: false, message: 'Unauthorized' }, 401);
+    try {
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        const userTodos = await db.query.todos.findMany({
+        where: (todos, { eq }) => eq(todos.usersid, user.id)
     });
     return c.json({ success: true, data: userTodos });
+    } catch (error) {
+        return c.json({ success: false, message: 'Unauthorized' }, 401);
+    }
 });
 
 const port = 3333;
